@@ -31,6 +31,10 @@ public class BookService {
         return bookRepository.findById(id).map(book -> {
             book.setTitle(bookDetails.getTitle());
             book.setAuthor(bookDetails.getAuthor());
+            book.setGenre(bookDetails.getGenre());
+            book.setYear(bookDetails.getYear());
+            book.setDescription(bookDetails.getDescription());
+            book.setPrice(bookDetails.getPrice());
             return bookRepository.save(book);
         }).orElseGet(() -> {
             bookDetails.setId(id);

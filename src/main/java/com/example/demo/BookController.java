@@ -1,9 +1,19 @@
 package com.example.demo;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.qrcode.QRCodeWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.List;
 
 @RestController
@@ -25,7 +35,19 @@ public class BookController {
 
     // Create a new book
     @PostMapping
-    public Book addBook(@RequestBody Book book) {
+    public Book addBook(@RequestBody Book book) throws WriterException, IOException {
+        QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(book.toString(), BarcodeFormat.QR_CODE, 250, 250);
+
+        BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
+
+        byte[] qrCodeImage = byteArrayOutputStream.toByteArray();
+        String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCodeImage);
+
+        book.setBase64QrCode(qrCodeBase64);
         return bookService.saveBook(book);
     }
 
@@ -44,6 +66,10 @@ public class BookController {
                 .map(book -> {
                     book.setTitle(bookDetails.getTitle());
                     book.setAuthor(bookDetails.getAuthor());
+                    book.setGenre(bookDetails.getGenre());
+                    book.setYear(bookDetails.getYear());
+                    book.setDescription(bookDetails.getDescription());
+                    book.setPrice(bookDetails.getPrice());
                     Book updatedBook = bookService.saveBook(book);
                     return ResponseEntity.ok(updatedBook);
                 })

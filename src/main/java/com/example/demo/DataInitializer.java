@@ -16,8 +16,8 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        bookService.saveBook(new Book("The Catcher in the Rye", "J.D. Salinger"));
-        bookService.saveBook(new Book("To Kill a Mockingbird", "Harper Lee"));
-        bookService.saveBook(new Book("1984", "George Orwell"));
+//        bookService.saveBook(new Book("The Catcher in the Rye", "J.D. Salinger"));
+//        bookService.saveBook(new Book("To Kill a Mockingbird", "Harper Lee"));
+//        bookService.saveBook(new Book("1984", "George Orwell"));
     }
 }
