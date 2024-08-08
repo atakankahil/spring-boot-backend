@@ -13,8 +13,10 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/books")
@@ -36,24 +38,32 @@ public class BookController {
     // Create a new book
     @PostMapping
     public Book addBook(@RequestBody Book book) throws WriterException, IOException {
-        QRCodeWriter qrCodeWriter = new QRCodeWriter();
-        BitMatrix bitMatrix = qrCodeWriter.encode(book.toString(), BarcodeFormat.QR_CODE, 250, 250);
+        List<Book> bookList = new ArrayList<>();
+        for (int i = 0; i < book.getQuantity(); i++) {
+            Book clone = book.clone();
+            clone.setId(UUID.randomUUID().toString());
 
-        BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
+            QRCodeWriter qrCodeWriter = new QRCodeWriter();
+            BitMatrix bitMatrix = qrCodeWriter.encode(clone.toString(), BarcodeFormat.QR_CODE, 250, 250);
 
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
+            BufferedImage bufferedImage = MatrixToImageWriter.toBufferedImage(bitMatrix);
 
-        byte[] qrCodeImage = byteArrayOutputStream.toByteArray();
-        String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCodeImage);
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            ImageIO.write(bufferedImage, "png", byteArrayOutputStream);
 
-        book.setBase64QrCode(qrCodeBase64);
-        return bookService.saveBook(book);
+            byte[] qrCodeImage = byteArrayOutputStream.toByteArray();
+            String qrCodeBase64 = Base64.getEncoder().encodeToString(qrCodeImage);
+
+            clone.setBase64QrCode(qrCodeBase64);
+            bookList.add(clone);
+        }
+        bookService.saveBooks(bookList);
+        return book;
     }
 
     // Get a book by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Book> getBookById(@PathVariable int id) {
+    public ResponseEntity<Book> getBookById(@PathVariable String id) {
         return bookService.getBookById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
@@ -61,7 +71,7 @@ public class BookController {
 
     // Update a book by ID
     @PutMapping("/{id}")
-    public ResponseEntity<Book> updateBook(@PathVariable int id, @RequestBody Book bookDetails) {
+    public ResponseEntity<Book> updateBook(@PathVariable String id, @RequestBody Book bookDetails) {
         return bookService.getBookById(id)
                 .map(book -> {
                     book.setTitle(bookDetails.getTitle());
@@ -82,7 +92,7 @@ public class BookController {
 
     // Delete a book by ID
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable int id) {
+    public ResponseEntity<Void> deleteBook(@PathVariable String id) {
         return bookService.getBookById(id)
                 .map(book -> {
                     bookService.deleteBook(id);

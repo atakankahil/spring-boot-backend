@@ -3,6 +3,7 @@ package com.example.demo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,10 +17,17 @@ public class BookService {
     }
 
     public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+        List<Book> copiesList = bookRepository.getAllNonRentedCopies();
+        List<Book> bookList = new ArrayList<>();
+        for (Book book : copiesList) {
+            if(bookList.stream().noneMatch((b-> b.equals(book)))){
+                bookList.add(book);
+            }
+        }
+        return bookList;
     }
 
-    public Optional<Book> getBookById(int id) {
+    public Optional<Book> getBookById(String id) {
         return bookRepository.findById(id);
     }
 
@@ -27,7 +35,10 @@ public class BookService {
         return bookRepository.save(book);
     }
 
-    public Book updateBook(int id, Book bookDetails) {
+    public List<Book> saveBooks(List<Book> books){
+        return bookRepository.saveAll(books);
+    }
+    public Book updateBook(String id, Book bookDetails) {
         return bookRepository.findById(id).map(book -> {
             book.setTitle(bookDetails.getTitle());
             book.setAuthor(bookDetails.getAuthor());
@@ -42,7 +53,7 @@ public class BookService {
         });
     }
 
-    public void deleteBook(int id) {
+    public void deleteBook(String id) {
         bookRepository.deleteById(id);
     }
 }
