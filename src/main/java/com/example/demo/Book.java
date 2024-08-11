@@ -133,9 +133,7 @@ public class Book implements Cloneable {
                 ", title='" + title + '\'' +
                 ", author='" + author + '\'' +
                 ", year=" + year +
-                ", description='" + description + '\'' +
                 ", genre='" + genre + '\'' +
-                ", price=" + price +
                 '}';
     }
 
