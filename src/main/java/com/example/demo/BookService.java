@@ -28,7 +28,7 @@ public class BookService {
         List<Book> bookList = new ArrayList<>();
         for (Book book : copiesList) {
             if (bookList.stream().noneMatch(b -> b.equals(book))) {
-                book.setQuantity(getBookQuantity(book.getTitle(), book.getAuthor(), book.getYear()));
+                book.setQuantity(getNoneRentedBooks(book.getTitle(), book.getAuthor(), book.getYear()));
                 bookList.add(book);
             }
         }
@@ -36,7 +36,13 @@ public class BookService {
     }
 
     public Optional<Book> getBookById(String id) {
-        return bookRepository.findById(id);
+        Optional<Book> bookOptional = bookRepository.findById(id);
+        if (bookOptional.isPresent()) {
+            Book book = bookOptional.get();
+            book.setQuantity(getNoneRentedBooks(book.getTitle(), book.getAuthor(), book.getYear()));
+            return Optional.of(book);
+        }
+        return Optional.empty();
     }
 
     public Book saveBook(Book book) throws Exception {
@@ -86,6 +92,26 @@ public class BookService {
         bookRepository.deleteById(id);
     }
 
+    public Book rentBook(String id) throws Exception {
+        Book book = bookRepository.findById(id).orElseThrow(() -> new Exception("Book not found"));
+        if (book.getRented()) {
+            throw new Exception("Book is already rented");
+        }
+        book.setRented(true);
+        bookRepository.save(book);
+        return getBookById(id).orElse(null);
+    }
+
+    public Book returnBook(String id) throws Exception {
+        Book book = bookRepository.findById(id).orElseThrow(() -> new Exception("Book not found"));
+        if (!book.getRented()) {
+            throw new Exception("Book is not rented");
+        }
+        book.setRented(false);
+        bookRepository.save(book);
+        return getBookById(id).orElse(null);
+    }
+
     private List<Book> updateBooks(Book bookDetails, List<Book> booksToUpdate) throws Exception {
         List<Book> updatedBooks = new ArrayList<>();
         for (Book book : booksToUpdate) {
@@ -104,5 +130,16 @@ public class BookService {
 
     private Integer getBookQuantity(String title, String author, Integer year) {
         return bookRepository.findByTitleAuthorYear(title, author, year).size();
+    }
+
+    private Integer getNoneRentedBooks(String title, String author, Integer year) {
+        List<Book> nonRentedBooks = bookRepository.findByTitleAuthorYear(title, author, year);
+        int count = 0;
+        for (Book book : nonRentedBooks) {
+            if (!book.getRented()) {
+                count++;
+            }
+        }
+        return count;
     }
 }

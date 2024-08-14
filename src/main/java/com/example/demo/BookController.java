@@ -71,4 +71,30 @@ public class BookController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build(); // Return 400 if an exception occurs
         }
     }
+
+    // New endpoint for renting a book
+    @PostMapping("/{id}/rent")
+    public ResponseEntity<Book> rentBook(@PathVariable String id, Authentication authentication) {
+        String username = authentication.getName();
+        System.out.println("User " + username + " is attempting to rent book with id: " + id);
+        try {
+            return ResponseEntity.ok(bookService.rentBook(id));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Return 400 if an exception occurs
+        }
+    }
+
+    // New endpoint for returning a book
+    @PostMapping("/{id}/return")
+    public ResponseEntity<Book> returnBook(@PathVariable String id, Authentication authentication) {
+        String username = authentication.getName();
+        System.out.println("User " + username + " is attempting to return book with id: " + id);
+        try {
+            return ResponseEntity.ok(bookService.returnBook(id));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Return 400 if an exception occurs
+        }
+    }
 }
