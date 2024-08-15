@@ -1,8 +1,6 @@
 package com.example.demo;
 
 import jakarta.persistence.*;
-import org.springframework.boot.context.properties.bind.DefaultValue;
-import org.springframework.lang.NonNull;
 
 import java.util.Objects;
 
@@ -21,18 +19,20 @@ public class Book implements Cloneable {
     @Column(nullable = false)
     private boolean isRented = false;
 
+    private String section;
+    private Integer shelf;
+
     @Lob
     @Column(columnDefinition = "TEXT")
     private String base64QrCode;
 
     @Transient
-    private Integer Quantity;
+    private Integer quantity;
 
     // Constructors
-    public Book() {
-    }
+    public Book() {}
 
-    public Book(String id, String title, String author, Integer year, String description, String genre, Double price, Boolean isRented, String base64QrCode) {
+    public Book(String id, String title, String author, Integer year, String description, String genre, Double price, Boolean isRented, String base64QrCode, String section, Integer shelf) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -42,9 +42,28 @@ public class Book implements Cloneable {
         this.price = price;
         this.isRented = isRented;
         this.base64QrCode = base64QrCode;
+        this.section = section;
+        this.shelf = shelf;
     }
 
-    // Getters and setters
+    // Getters and setters for the new fields
+    public String getSection() {
+        return section;
+    }
+
+    public void setSection(String section) {
+        this.section = section;
+    }
+
+    public Integer getShelf() {
+        return shelf;
+    }
+
+    public void setShelf(Integer shelf) {
+        this.shelf = shelf;
+    }
+
+    // Other getters, setters, and methods...
     public String getId() {
         return id;
     }
@@ -101,7 +120,6 @@ public class Book implements Cloneable {
         this.price = price;
     }
 
-
     public Boolean getRented() {
         return isRented;
     }
@@ -119,11 +137,11 @@ public class Book implements Cloneable {
     }
 
     public Integer getQuantity() {
-        return Quantity;
+        return quantity;
     }
 
     public void setQuantity(Integer quantity) {
-        Quantity = quantity;
+        this.quantity = quantity;
     }
 
     @Override
@@ -134,14 +152,15 @@ public class Book implements Cloneable {
                 ", author='" + author + '\'' +
                 ", year=" + year +
                 ", genre='" + genre + '\'' +
+                ", section='" + section + '\'' +  // Include section in toString
+                ", shelf=" + shelf +               // Include shelf in toString
                 '}';
     }
 
     @Override
     public Book clone() {
         try {
-            Book clone = (Book) super.clone();
-            return clone;
+            return (Book) super.clone();
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();
         }
@@ -151,24 +170,31 @@ public class Book implements Cloneable {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Book book = (Book) o;
-        if (!this.title.equals(book.getTitle())) {
+        if (!Objects.equals(this.title, book.getTitle())) {
             return false;
         }
-        if (!this.author.equals(book.getAuthor())) {
+        if (!Objects.equals(this.author, book.getAuthor())) {
             return false;
         }
-        if (!this.year.equals(book.getYear())) {
+        if (!Objects.equals(this.year, book.getYear())) {
             return false;
         }
-        if (!this.description.equals(book.getDescription())) {
+        if (!Objects.equals(this.description, book.getDescription())) {
             return false;
         }
-        if (!this.genre.equals(book.getGenre())) {
+        if (!Objects.equals(this.genre, book.getGenre())) {
             return false;
         }
-        if (!this.price.equals(book.getPrice())) {
+        if (!Objects.equals(this.price, book.getPrice())) {
+            return false;
+        }
+        if (!Objects.equals(this.section, book.getSection())) { // Handle null-safe comparison
+            return false;
+        }
+        if (!Objects.equals(this.shelf, book.getShelf())) { // Handle null-safe comparison
             return false;
         }
         return true;
     }
+
 }

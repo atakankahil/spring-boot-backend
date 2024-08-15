@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -43,6 +44,12 @@ public class BookService {
             return Optional.of(book);
         }
         return Optional.empty();
+    }
+
+    public List<Book> getAllRentedBooks() {
+        return bookRepository.findAll().stream()
+                .filter(Book::getRented)
+                .collect(Collectors.toList());
     }
 
     public Book saveBook(Book book) throws Exception {
@@ -121,15 +128,13 @@ public class BookService {
             book.setYear(bookDetails.getYear());
             book.setDescription(bookDetails.getDescription());
             book.setPrice(bookDetails.getPrice());
+            book.setSection(bookDetails.getSection()); // Set the section
+            book.setShelf(bookDetails.getShelf());     // Set the shelf
             book.setQuantity(bookDetails.getQuantity());
             book.setBase64QrCode(createQrCode(book));
             updatedBooks.add(book);
         }
         return bookRepository.saveAll(updatedBooks);
-    }
-
-    private Integer getBookQuantity(String title, String author, Integer year) {
-        return bookRepository.findByTitleAuthorYear(title, author, year).size();
     }
 
     private Integer getNoneRentedBooks(String title, String author, Integer year) {

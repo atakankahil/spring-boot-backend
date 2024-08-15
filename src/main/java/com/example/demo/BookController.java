@@ -73,7 +73,7 @@ public class BookController {
     }
 
     // New endpoint for renting a book
-    @PostMapping("/{id}/rent")
+    @PutMapping("/rent/{id}")
     public ResponseEntity<Book> rentBook(@PathVariable String id, Authentication authentication) {
         String username = authentication.getName();
         System.out.println("User " + username + " is attempting to rent book with id: " + id);
@@ -86,7 +86,7 @@ public class BookController {
     }
 
     // New endpoint for returning a book
-    @PostMapping("/{id}/return")
+    @PutMapping("/return/{id}")
     public ResponseEntity<Book> returnBook(@PathVariable String id, Authentication authentication) {
         String username = authentication.getName();
         System.out.println("User " + username + " is attempting to return book with id: " + id);
@@ -96,5 +96,13 @@ public class BookController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Return 400 if an exception occurs
         }
+    }
+
+    @GetMapping("/rented")
+    public ResponseEntity<List<Book>> getRentedBooks(Authentication authentication) {
+        String username = authentication.getName();
+        System.out.println("User " + username + " is fetching all rented books.");
+        List<Book> rentedBooks = bookService.getAllRentedBooks();
+        return ResponseEntity.ok(rentedBooks);
     }
 }
