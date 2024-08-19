@@ -13,6 +13,7 @@ public class User {
     private String username;
     private String password;
     private boolean enabled;
+    private String userRole;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(
@@ -71,4 +72,13 @@ public class User {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
+
+    public  String getUserRole(){
+        return userRole;
+    }
+
+    public void setUserRole(String userRole){
+        this.userRole = userRole;
+    }
+
 }

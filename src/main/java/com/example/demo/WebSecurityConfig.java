@@ -42,9 +42,10 @@ public class WebSecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/books/**").authenticated()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/auth/**").permitAll() // Publicly accessible endpoints
+                        .requestMatchers("/admin/**").hasRole("ADMIN") // Only accessible by admins
+                        .requestMatchers("/books/**").hasAnyRole("USER", "ADMIN") // Accessible by both users and admins
+                        .anyRequest().authenticated() // Any other request requires authentication
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
